@@ -4,7 +4,7 @@
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-Private-lightgrey)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 全栈 **TypeScript**（Hono + Vite），在浏览器里完成转写与朗读。依赖 [小米 MiMo Token Plan](https://mimo.mi.com/docs/zh-CN/price/token-plan) 的 ASR / TTS 能力。
 
@@ -412,7 +412,7 @@ curl -s http://127.0.0.1:3900/api/tts | jq .
 
 ## License
 
-Private / local tool — 未声明开源许可证前仅供个人本地使用。
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 

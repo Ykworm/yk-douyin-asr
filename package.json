@@ -1,7 +1,7 @@
 {
   "name": "yk-douyin-asr",
   "version": "0.1.0",
-  "private": true,
+  "license": "MIT",
   "description": "Douyin link to text via MiMo ASR (full-stack TypeScript)",
   "workspaces": [
     "server",
