@@ -1,0 +1,26 @@
+{
+  "name": "yk-douyin-asr",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Douyin link to text via MiMo ASR (full-stack TypeScript)",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "ensure-deps": "bash scripts/ensure-deps.sh",
+    "predev": "bash scripts/ensure-deps.sh",
+    "prestart": "bash scripts/ensure-deps.sh",
+    "dev": "WEB_PORT=3900 npm run dev -w web",
+    "build": "npm run build -w server && npm run build -w web",
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "wait-on": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@yk-douyin-asr/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "WEB_PORT=3900 vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@hono/node-server": "^1.13.8",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}
