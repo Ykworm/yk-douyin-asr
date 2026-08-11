@@ -8,7 +8,6 @@ import { formatDuration, probeMediaDurationSec } from "../media-probe.js";
 
 /** MiMo ASR 单次输出约 2k tokens，长段易截断 → 按时长切分 */
 const MAX_CHUNK_BYTES = 9 * 1024 * 1024;
-const MAX_ASR_CHUNK_SEC = Number(process.env.ASR_CHUNK_SEC ?? "180");
 
 export async function extractAudio(videoPath: string, outDir: string, log?: JobLogger): Promise<string> {
   const audioPath = join(outDir, "audio.mp3");
@@ -25,7 +24,7 @@ export async function extractAudio(videoPath: string, outDir: string, log?: JobL
 }
 
 function chunkDurationSec(totalSec: number, totalBytes: number): number {
-  let chunkSec = MAX_ASR_CHUNK_SEC;
+  let chunkSec = config.asrChunkSec;
   if (totalBytes > MAX_CHUNK_BYTES && totalSec > 0) {
     const bytesPerSec = totalBytes / totalSec;
     const sizeBased = Math.floor(MAX_CHUNK_BYTES / bytesPerSec);
@@ -40,14 +39,14 @@ export async function splitAudioIfNeeded(audioPath: string, outDir: string, log?
   const chunkSec = chunkDurationSec(duration, size);
   const expectedChunks = duration > 0 ? Math.ceil(duration / chunkSec) : 1;
 
-  if (size <= MAX_CHUNK_BYTES && duration <= MAX_ASR_CHUNK_SEC) {
+  if (size <= MAX_CHUNK_BYTES && duration <= config.asrChunkSec) {
     log?.info("音频无需分片", `${formatDuration(duration)} · ${formatBytes(size)}`);
     return [audioPath];
   }
 
   log?.info(
     "ASR 分片策略",
-    `总时长 ${formatDuration(duration)} · 每段 ≤${chunkSec}s（避免 ASR 输出截断）· 预计 ${expectedChunks} 段`,
+    `总时长 ${formatDuration(duration)} · 每段 ≤${chunkSec}s · 预计 ${expectedChunks} 段`,
   );
 
   const pattern = join(outDir, "chunk_%03d.mp3");
@@ -87,4 +86,25 @@ export async function splitAudioIfNeeded(audioPath: string, outDir: string, log?
   return chunks;
 }
 
-export { MAX_CHUNK_BYTES, MAX_ASR_CHUNK_SEC };
+/** 将一段音频从中点拆成两半（用于 ASR 偏短重试） */
+export async function splitAudioHalf(audioPath: string, outDir: string, log?: JobLogger): Promise<[string, string]> {
+  const duration = await probeMediaDurationSec(audioPath, log, "split-half");
+  const mid = Math.max(15, duration / 2);
+  const a = join(outDir, "half_a.mp3");
+  const b = join(outDir, "half_b.mp3");
+  const enc = ["-acodec", "libmp3lame", "-ar", "16000", "-ac", "1", "-b:a", "64k"];
+
+  let { code, stderr } = await runLoggedCommand(log, "ffmpeg-half-a", "ffmpeg", [
+    "-y", "-i", audioPath, "-t", String(mid), ...enc, a,
+  ]);
+  if (code !== 0) throw new Error(stderr.trim() || "音频拆半失败");
+
+  ({ code, stderr } = await runLoggedCommand(log, "ffmpeg-half-b", "ffmpeg", [
+    "-y", "-i", audioPath, "-ss", String(mid), ...enc, b,
+  ]));
+  if (code !== 0) throw new Error(stderr.trim() || "音频拆半失败");
+
+  return [a, b];
+}
+
+export { MAX_CHUNK_BYTES };

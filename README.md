@@ -147,7 +147,8 @@ MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
 # ASR
 MIMO_ASR_MODEL=mimo-v2.5-asr
 ASR_LANGUAGE=zh
-ASR_CHUNK_SEC=180          # 单段 ASR 最长秒数，防输出截断
+ASR_CHUNK_SEC=90           # 单段 ASR 最长秒数（默认 90，口播密集可再调小）
+ASR_MIN_CHARS_PER_SEC=2.5  # 低于此字/秒自动拆半重试
 
 # TTS（Markdown 朗读 / 转写后朗读）
 MIMO_TTS_MODEL=mimo-v2.5-tts
@@ -175,7 +176,8 @@ PORT=3900
 | `MIMO_BASE_URL` | `https://token-plan-cn.xiaomimimo.com/v1` | MiMo API 基址 |
 | `MIMO_ASR_MODEL` | `mimo-v2.5-asr` | 语音识别模型 |
 | `ASR_LANGUAGE` | `zh` | `auto` / `zh` / `en` |
-| `ASR_CHUNK_SEC` | `180` | 超过此时长自动分片送 ASR |
+| `ASR_CHUNK_SEC` | `90` | 超过此时长自动分片送 ASR |
+| `ASR_MIN_CHARS_PER_SEC` | `2.5` | 识别偏短时拆半重试阈值（字/秒） |
 | `MIMO_TTS_MODEL` | `mimo-v2.5-tts` | TTS 模型 |
 | `MIMO_TTS_VOICE` | `冰糖` | 预置音色（还有 `茉莉` 等） |
 | `MIMO_TTS_STYLE_PROMPT` | 御姐 + 逐字朗读 | TTS 风格指令 |
@@ -358,7 +360,8 @@ REPO=$(basename "$(git rev-parse --show-toplevel)")
 | 顶栏「未检测到登录态」 | yt-dlp 未装 / 无 Cookie 权限 | `brew install yt-dlp`；macOS 完全磁盘访问 |
 | API 404 / 401 | 端口被占 / 访问错端口 | 只用 **3900**；`lsof -i :3900` |
 | TTS 404 | 开发态 Hono 缓存旧路由 | 重启 `./scripts/dev.sh` |
-| 转写不全 | ASR 单段过长被截断 | 调小 `ASR_CHUNK_SEC=120`；看日志「ASR 分片策略」 |
+| 转写不全 | ASR 单段过长或某段识别偏短 | 默认已 90s 分片 + 偏短拆半重试；仍不全可设 `ASR_CHUNK_SEC=60`；看日志「识别偏短」「拆半重试」 |
+| 画面文字没转写 | ASR 只识别**口播/旁白**，不含视频内字幕/花字 | 需 OCR 或手动复制；本工具不做画面文字识别 |
 | 日志停在「识别」 | UI 未收到完成事件 | 硬刷新；看是否有「任务完成」日志 |
 | `下载时长偏短` | 视频未下完整 | 升级 yt-dlp：`brew upgrade yt-dlp` |
 | Playwright 兜底 | yt-dlp 失败 | 日志会 WARN；尽量保证 yt-dlp 可用 |

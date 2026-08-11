@@ -130,7 +130,7 @@ async function runJob(jobId: string, shareText: string): Promise<void> {
     const audioSize = statSync(audioPath).size;
     log.info("音频提取完成", `${audioPath} (${formatBytes(audioSize)})`);
 
-    log.info("检查是否需要分片", `MiMo ASR 单段建议 ≤3 分钟 · 文件上限 ${formatBytes(9 * 1024 * 1024)}`);
+    log.info("检查是否需要分片", `单段 ≤${config.asrChunkSec}s · 偏短自动拆半重试 · 文件上限 ${formatBytes(9 * 1024 * 1024)}`);
     const chunks = await splitAudioIfNeeded(audioPath, jobDir, log);
     if (chunks.length > 1) {
       log.warn(`音频已切分为 ${chunks.length} 段`, chunks.map((c, i) => `#${i + 1} ${formatBytes(statSync(c).size)}`).join(", "));

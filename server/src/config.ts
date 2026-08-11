@@ -34,6 +34,10 @@ export const config = {
     process.env.MIMO_TTS_VOICE_PROMPT ??
     "成熟御姐女声，25-30岁，中低音区，声线丝滑醇厚带着磁性。语速从容不迫，语气慵懒自信。",
   asrLanguage: (process.env.ASR_LANGUAGE ?? "zh") as "auto" | "zh" | "en",
+  /** 单段 ASR 音频上限（秒）。口播密集时建议 60–90 */
+  asrChunkSec: Number(process.env.ASR_CHUNK_SEC ?? "90"),
+  /** 低于此字/秒视为识别偏短，自动拆半重试 */
+  asrMinCharsPerSec: Number(process.env.ASR_MIN_CHARS_PER_SEC ?? "2.5"),
   tempDir: expandHome(process.env.TEMP_DIR ?? "/tmp/yk-douyin-asr"),
   dataDir: expandHome(process.env.DATA_DIR ?? "~/.yk-douyin-asr"),
   douyinAuthSource: process.env.DOUYIN_AUTH_SOURCE ?? "auto",
